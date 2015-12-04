@@ -1,11 +1,18 @@
 package io.github.cr3ahal0.idgasbsmyl;
 
+import io.github.cr3ahal0.idgasbsmyl.handler.MessageHandler;
+import io.github.cr3ahal0.idgasbsmyl.handler.MessageHandlerFactory;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.CouchDbInstance;
+import org.ektorp.http.HttpClient;
+import org.ektorp.http.StdHttpClient;
+import org.ektorp.impl.StdCouchDbConnector;
+import org.ektorp.impl.StdCouchDbInstance;
+
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
+import javax.jms.*;
+import java.net.MalformedURLException;
 
 /**
  * Created by E130110Z on 04/12/15.
@@ -24,12 +31,31 @@ import javax.jms.TextMessage;
                 propertyValue = "jms/queue.mine") })
 public class MessageMdb implements MessageListener {
 
+    CouchDbConnector db;
+
+    public MessageMdb () throws MalformedURLException {
+        HttpClient httpClient = new StdHttpClient.Builder()
+                .url("http://localhost:5984")
+                .build();
+
+        CouchDbInstance dbInstance = new StdCouchDbInstance(httpClient);
+        db = new StdCouchDbConnector("mydatabase", dbInstance);
+
+        db.createDatabaseIfNotExists();
+    }
+
     public void onMessage(Message message) {
 
-        if (message instanceof TextMessage) {
-            TextMessage txt = (TextMessage)message;
+        if (message instanceof MapMessage) {
+            MapMessage map = (MapMessage)message;
             try {
-                System.out.println(txt.getText());
+                //Check whenever the message is correct and has a valid type
+                MessageHandler handler = MessageHandlerFactory.get(map);
+                if (handler.isValid(map)) {
+
+                    //TODO Persist it with Ektorp
+
+                }
             } catch (JMSException e) {
                 System.out.println("Error while getting message text");
             }
