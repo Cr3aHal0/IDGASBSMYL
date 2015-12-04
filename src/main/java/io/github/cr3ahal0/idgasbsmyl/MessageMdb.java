@@ -1,5 +1,6 @@
 package io.github.cr3ahal0.idgasbsmyl;
 
+import io.github.cr3ahal0.idgasbsmyl.entity.MessageRepository;
 import io.github.cr3ahal0.idgasbsmyl.handler.MessageHandler;
 import io.github.cr3ahal0.idgasbsmyl.handler.MessageHandlerFactory;
 import org.ektorp.CouchDbConnector;
@@ -33,6 +34,8 @@ public class MessageMdb implements MessageListener {
 
     CouchDbConnector db;
 
+    MessageRepository repo;
+
     public MessageMdb () throws MalformedURLException {
         HttpClient httpClient = new StdHttpClient.Builder()
                 .url("http://localhost:5984")
@@ -42,6 +45,8 @@ public class MessageMdb implements MessageListener {
         db = new StdCouchDbConnector("mydatabase", dbInstance);
 
         db.createDatabaseIfNotExists();
+
+        repo = new MessageRepository(db);
     }
 
     public void onMessage(Message message) {
@@ -54,7 +59,7 @@ public class MessageMdb implements MessageListener {
                 if (handler.isValid(map)) {
 
                     //TODO Persist it with Ektorp
-
+                    repo.add(new io.github.cr3ahal0.idgasbsmyl.entity.Message(map));
                 }
             } catch (JMSException e) {
                 System.out.println("Error while getting message text");

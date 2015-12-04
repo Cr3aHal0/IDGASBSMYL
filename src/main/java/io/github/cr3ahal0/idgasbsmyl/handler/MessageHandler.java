@@ -1,5 +1,6 @@
 package io.github.cr3ahal0.idgasbsmyl.handler;
 
+import javax.jms.JMSException;
 import javax.jms.MapMessage;
 
 /**
@@ -7,6 +8,6 @@ import javax.jms.MapMessage;
  */
 public abstract class MessageHandler {
 
-    public abstract boolean isValid(MapMessage message);
+    public abstract boolean isValid(MapMessage message) throws JMSException;
 
 }
